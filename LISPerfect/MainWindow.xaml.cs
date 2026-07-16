@@ -24,6 +24,7 @@ using HorizontalAlignment = System.Windows.HorizontalAlignment;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using KeyEventHandler = System.Windows.Input.KeyEventHandler;
 using Media = System.Windows.Media;
+using Point = System.Windows.Point;
 using MessageBox = System.Windows.MessageBox;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
 using MouseEventHandler = System.Windows.Input.MouseEventHandler;
@@ -79,6 +80,9 @@ namespace LISPerfect
         private EditorTab? _currentTab;
         private bool _switchingTab;
         private EditorTab? _contextTab;
+        private Point? _dragStartPoint;
+        private EditorTab? _draggingTab;
+        private const double DragThreshold = 6.0;
 
         // --- Autocomplete state ---
         private CompletionWindow? _completionWindow;
@@ -788,6 +792,13 @@ namespace LISPerfect
             closeButton.Click += TabCloseButton_Click;
             panel.Children.Add(closeButton);
 
+            // Wire drag handlers on the header panel itself. We use the panel rather than
+            // the TabItem because we want to detect drag on the visible header area.
+            panel.Tag = tab; // so drag handlers can identify which tab is being dragged
+            panel.MouseLeftButtonDown += TabHeader_MouseLeftButtonDown;
+            panel.MouseMove += TabHeader_MouseMove;
+            panel.MouseLeftButtonUp += TabHeader_MouseLeftButtonUp;
+
             return panel;
         }
 
@@ -797,6 +808,108 @@ namespace LISPerfect
             {
                 CloseTab(tab);
                 e.Handled = true;
+            }
+        }
+
+        private void TabHeader_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (sender is not StackPanel panel) return;
+            if (panel.Tag is not EditorTab tab) return;
+
+            // Ignore clicks on the × button — that's for closing, not dragging.
+            if (e.OriginalSource is DependencyObject src)
+            {
+                if (FindAncestor<Button>(src) != null) return;
+            }
+
+            _dragStartPoint = e.GetPosition(TabBar);
+            _draggingTab = tab;
+        }
+
+        private void TabHeader_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (_dragStartPoint == null || _draggingTab == null) return;
+            if (e.LeftButton != System.Windows.Input.MouseButtonState.Pressed)
+            {
+                _dragStartPoint = null;
+                _draggingTab = null;
+                return;
+            }
+
+            Point current = e.GetPosition(TabBar);
+            double dx = current.X - _dragStartPoint.Value.X;
+
+            // Only start reacting once past the threshold.
+            if (Math.Abs(dx) < DragThreshold) return;
+
+            // Find which tab index the mouse is currently over.
+            int targetIndex = FindTabIndexAt(current);
+            int sourceIndex = _tabs.IndexOf(_draggingTab);
+
+            if (targetIndex < 0 || sourceIndex < 0 || targetIndex == sourceIndex) return;
+
+            // Reorder: move the dragging tab to the target position.
+            MoveTab(sourceIndex, targetIndex);
+
+            // Reset the drag origin to the current position so continuous drag works.
+            _dragStartPoint = current;
+        }
+
+        private void TabHeader_MouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            _dragStartPoint = null;
+            _draggingTab = null;
+        }
+
+        /// <summary>
+        /// Find the index of the tab whose visual header contains the given point.
+        /// Returns -1 if the point isn't over any tab.
+        /// </summary>
+        private int FindTabIndexAt(Point pointInTabBar)
+        {
+            for (int i = 0; i < TabBar.Items.Count; i++)
+            {
+                if (TabBar.Items[i] is TabItem item)
+                {
+                    var itemTopLeft = item.TranslatePoint(new Point(0, 0), TabBar);
+                    var itemBottomRight = item.TranslatePoint(new Point(item.ActualWidth, item.ActualHeight), TabBar);
+                    if (pointInTabBar.X >= itemTopLeft.X && pointInTabBar.X <= itemBottomRight.X)
+                    {
+                        return i;
+                    }
+                }
+            }
+            return -1;
+        }
+
+        /// <summary>
+        /// Move a tab from one position to another in both the data model and UI.
+        /// Preserves the current selection.
+        /// </summary>
+        private void MoveTab(int fromIndex, int toIndex)
+        {
+            if (fromIndex < 0 || fromIndex >= _tabs.Count) return;
+            if (toIndex < 0 || toIndex >= _tabs.Count) return;
+
+            // Track which tab was selected so we can restore selection after the move.
+            var selectedTab = _currentTab;
+
+            // Reorder _tabs list.
+            var tab = _tabs[fromIndex];
+            _tabs.RemoveAt(fromIndex);
+            _tabs.Insert(toIndex, tab);
+
+            // Reorder TabBar.Items.
+            var item = TabBar.Items[fromIndex];
+            TabBar.Items.RemoveAt(fromIndex);
+            TabBar.Items.Insert(toIndex, item);
+
+            // Restore selection (the removed/inserted item retains its 'selected' state
+            // but WPF sometimes needs a nudge).
+            if (selectedTab != null)
+            {
+                var itemToSelect = FindTabItem(selectedTab);
+                if (itemToSelect != null) TabBar.SelectedItem = itemToSelect;
             }
         }
 
