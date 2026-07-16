@@ -3,6 +3,8 @@
 A modern Common Lisp editor for Windows, built as an alternative to Emacs/Slime
 for people who want a clean IDE experience.
 
+![LISPerfect screenshot](screenshot.png)
+
 ## Features
 
 - Multi-file tabs with Common Lisp syntax highlighting
