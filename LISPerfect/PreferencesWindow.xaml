@@ -1,0 +1,64 @@
+﻿<Window x:Class="LISPerfect.PreferencesWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Preferences" Height="480" Width="480"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,12"
+                   Text="LISPerfect Preferences"/>
+
+        <StackPanel Grid.Row="1">
+            <GroupBox Header="Editing" Padding="10">
+                <StackPanel>
+                    <CheckBox x:Name="ParedItCheckBox" Content="Enable paredit-lite (auto-close parens and quotes)"
+                              Margin="0,4,0,4"/>
+                    <TextBlock Text="Automatically closes parentheses and quotes as you type. Backspace still deletes them freely."
+                               FontStyle="Italic" Foreground="Gray" TextWrapping="Wrap" Margin="20,0,0,0"/>
+                </StackPanel>
+            </GroupBox>
+
+            <GroupBox Header="Auto-save" Padding="10" Margin="0,10,0,0">
+                <StackPanel>
+                    <CheckBox x:Name="AutoSaveOnFocusLossCheckBox"
+                              Content="Save changes when LISPerfect loses focus"
+                              Margin="0,4,0,4"/>
+                    <TextBlock Text="Saves all changed files with a known location when you switch to another window."
+                               FontStyle="Italic" Foreground="Gray" TextWrapping="Wrap" Margin="20,0,0,8"/>
+
+                    <CheckBox x:Name="AutoSaveOnIntervalCheckBox"
+                              Content="Save changes every"
+                              VerticalContentAlignment="Center"
+                              Margin="0,4,0,4"/>
+                    <StackPanel Orientation="Horizontal" Margin="20,0,0,4">
+                        <TextBox x:Name="AutoSaveIntervalBox" Width="50" Text="30"
+                                 VerticalContentAlignment="Center"/>
+                        <TextBlock Text=" seconds (minimum 5)" VerticalAlignment="Center" Margin="4,0,0,0"/>
+                    </StackPanel>
+                    <TextBlock Text="Untitled buffers are never auto-saved."
+                               FontStyle="Italic" Foreground="Gray" TextWrapping="Wrap" Margin="20,4,0,0"/>
+                </StackPanel>
+            </GroupBox>
+
+            <GroupBox Header="Automatic settings" Padding="10" Margin="0,10,0,0">
+                <TextBlock TextWrapping="Wrap">
+                    Font size, window position, and splitter position are saved automatically as you change them.
+                    <LineBreak/><LineBreak/>
+                    Settings are stored in the settings.json file. Use Tools → Open Settings Folder to inspect or edit it.
+                </TextBlock>
+            </GroupBox>
+        </StackPanel>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+            <Button Content="Cancel" Width="80" IsCancel="True" Margin="0,0,8,0"/>
+            <Button Content="OK" Width="80" IsDefault="True" Click="Ok_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

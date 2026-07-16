@@ -1,0 +1,304 @@
+﻿<Window x:Class="LISPerfect.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:avalon="http://icsharpcode.net/sharpdevelop/avalonedit"
+        xmlns:local="clr-namespace:LISPerfect"
+        Title="LISPerfect" Height="700" Width="1100"
+        Icon="/LISPerfect;component/LISPerfect.ico">
+
+    <Window.InputBindings>
+        <KeyBinding Modifiers="Control" Key="N" Command="{x:Static local:MainWindow.NewTabCommand}"/>
+        <KeyBinding Modifiers="Control" Key="O" Command="{x:Static local:MainWindow.OpenCommand}"/>
+        <KeyBinding Modifiers="Control" Key="S" Command="{x:Static local:MainWindow.SaveCommand}"/>
+        <KeyBinding Modifiers="Control+Shift" Key="S" Command="{x:Static local:MainWindow.SaveAsCommand}"/>
+        <KeyBinding Modifiers="Control" Key="L" Command="{x:Static local:MainWindow.ClearReplCommand}"/>
+        <KeyBinding Modifiers="Control" Key="OemPlus" Command="{x:Static local:MainWindow.ZoomInCommand}"/>
+        <KeyBinding Modifiers="Control" Key="OemMinus" Command="{x:Static local:MainWindow.ZoomOutCommand}"/>
+        <KeyBinding Modifiers="Control" Key="D0" Command="{x:Static local:MainWindow.ZoomResetCommand}"/>
+        <KeyBinding Key="F5" Command="{x:Static local:MainWindow.RunFileCommand}"/>
+        <KeyBinding Modifiers="Control" Key="T" Command="{x:Static local:MainWindow.NewTabCommand}"/>
+        <KeyBinding Modifiers="Control" Key="W" Command="{x:Static local:MainWindow.CloseTabCommand}"/>
+        <KeyBinding Modifiers="Control" Key="Tab" Command="{x:Static local:MainWindow.NextTabCommand}"/>
+        <KeyBinding Modifiers="Control+Shift" Key="Tab" Command="{x:Static local:MainWindow.PrevTabCommand}"/>
+        <KeyBinding Modifiers="Control" Key="D1" Command="{x:Static local:MainWindow.GoToTabCommand}" CommandParameter="0"/>
+        <KeyBinding Modifiers="Control" Key="D2" Command="{x:Static local:MainWindow.GoToTabCommand}" CommandParameter="1"/>
+        <KeyBinding Modifiers="Control" Key="D3" Command="{x:Static local:MainWindow.GoToTabCommand}" CommandParameter="2"/>
+        <KeyBinding Modifiers="Control" Key="D4" Command="{x:Static local:MainWindow.GoToTabCommand}" CommandParameter="3"/>
+        <KeyBinding Modifiers="Control" Key="D5" Command="{x:Static local:MainWindow.GoToTabCommand}" CommandParameter="4"/>
+        <KeyBinding Modifiers="Control" Key="D6" Command="{x:Static local:MainWindow.GoToTabCommand}" CommandParameter="5"/>
+        <KeyBinding Modifiers="Control" Key="D7" Command="{x:Static local:MainWindow.GoToTabCommand}" CommandParameter="6"/>
+        <KeyBinding Modifiers="Control" Key="D8" Command="{x:Static local:MainWindow.GoToTabCommand}" CommandParameter="7"/>
+        <KeyBinding Modifiers="Control" Key="D9" Command="{x:Static local:MainWindow.GoToTabCommand}" CommandParameter="8"/>
+        <KeyBinding Modifiers="Control" Key="Space" Command="{x:Static local:MainWindow.CompletionCommand}"/>
+        <KeyBinding Key="F12" Command="{x:Static local:MainWindow.JumpToDefinitionCommand}"/>
+    </Window.InputBindings>
+
+    <Grid x:Name="RootGrid">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- ============================================================ -->
+        <!-- Top: menu bar                                                -->
+        <!-- ============================================================ -->
+        <Menu Grid.Row="0">
+            <MenuItem Header="_File">
+                <MenuItem Header="_New Tab" InputGestureText="Ctrl+T" Click="NewFile_Click"/>
+                <MenuItem Header="_Open..." InputGestureText="Ctrl+O" Click="OpenFile_Click"/>
+                <MenuItem x:Name="RecentFilesMenu" Header="Open _Recent"
+                          SubmenuOpened="RecentFilesMenu_SubmenuOpened">
+                    <MenuItem Header="(loading...)" IsEnabled="False"/>
+                </MenuItem>
+                <Separator/>
+                <MenuItem Header="Open _Folder..." Click="OpenFolder_Click"/>
+                <MenuItem Header="_Close Folder" Click="CloseFolder_Click"/>
+                <Separator/>
+                <MenuItem Header="_Save" InputGestureText="Ctrl+S" Click="SaveFile_Click"/>
+                <MenuItem Header="Save _As..." InputGestureText="Ctrl+Shift+S" Click="SaveFileAs_Click"/>
+                <Separator/>
+                <MenuItem Header="_Close Tab" InputGestureText="Ctrl+W" Click="TabClose_Click"/>
+                <Separator/>
+                <MenuItem Header="E_xit" Click="Exit_Click"/>
+            </MenuItem>
+
+            <MenuItem Header="_Lisp">
+                <MenuItem x:Name="SendExprMenuItem" Header="Send Expression to REPL"
+                          InputGestureText="Ctrl+Enter" Click="SendExprMenuItem_Click"/>
+                <MenuItem Header="_Run File" InputGestureText="F5" Click="RunFile_Click"/>
+                <Separator/>
+                <MenuItem Header="Restart SBCL" Click="RestartSbcl_Click"/>
+                <Separator/>
+                <MenuItem Header="_Clear REPL Output" InputGestureText="Ctrl+L" Click="ClearRepl_Click"/>
+            </MenuItem>
+
+            <MenuItem Header="_View">
+                <MenuItem Header="Zoom _In" InputGestureText="Ctrl++" Click="ZoomIn_Click"/>
+                <MenuItem Header="Zoom _Out" InputGestureText="Ctrl+-" Click="ZoomOut_Click"/>
+                <MenuItem Header="_Reset Zoom" InputGestureText="Ctrl+0" Click="ZoomReset_Click"/>
+                <Separator/>
+                <MenuItem Header="_Theme">
+                    <MenuItem x:Name="ThemeDefaultMenuItem" Header="_Default"
+                              IsCheckable="True" Click="ThemeDefault_Click"/>
+                    <MenuItem x:Name="ThemeDarkMenuItem" Header="_Dark"
+                              IsCheckable="True" Click="ThemeDark_Click"/>
+                </MenuItem>
+            </MenuItem>
+
+            <MenuItem Header="_Tools">
+                <MenuItem Header="Complete _Symbol" InputGestureText="Ctrl+Space" Click="CompleteSymbol_Click"/>
+                <MenuItem Header="_Jump to Definition" InputGestureText="F12" Click="JumpToDefinition_Click"/>
+                <Separator/>
+                <MenuItem Header="_Preferences..." Click="Preferences_Click"/>
+                <Separator/>
+                <MenuItem Header="Open Settings _Folder" Click="OpenSettingsFolder_Click"/>
+            </MenuItem>
+
+            <MenuItem Header="_Quicklisp">
+                <MenuItem Header="_Install package..." Click="QlInstallPackage_Click"/>
+                <Separator/>
+                <MenuItem Header="_Reinstall Quicklisp..." Click="QlReinstall_Click"/>
+            </MenuItem>
+        </Menu>
+
+        <!-- ============================================================ -->
+        <!-- Middle: three columns — project tree, editor+tabs, REPL      -->
+        <!-- Layout: [project 0][splitter 1][editor 2][splitter 3][repl 4]-->
+        <!-- ============================================================ -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition x:Name="ProjectColumn" Width="220"/>
+                <ColumnDefinition Width="5"/>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="5"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Column 0: project tree pane -->
+            <Grid Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Row="0" Margin="6,4,6,4" Background="#F5F5F5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock x:Name="ProjectFolderLabel" Grid.Column="0"
+                               Text="No folder open" FontWeight="SemiBold"
+                               TextTrimming="CharacterEllipsis"
+                               VerticalAlignment="Center"/>
+                    <Button Grid.Column="1" Content="⋯" Padding="6,0" MinWidth="24"
+                            ToolTip="Project options" Click="ProjectMenu_Click">
+                        <Button.ContextMenu>
+                            <ContextMenu x:Name="ProjectMenuPopup">
+                                <MenuItem Header="_Open Folder..." Click="OpenFolder_Click"/>
+                                <MenuItem Header="_Close Folder" Click="CloseFolder_Click"/>
+                                <Separator/>
+                                <MenuItem x:Name="ShowOnlyLispMenuItem" Header="Show only _Lisp files"
+                                          IsCheckable="True" Click="ShowOnlyLisp_Click"/>
+                                <MenuItem Header="_Refresh" Click="RefreshProject_Click"/>
+                            </ContextMenu>
+                        </Button.ContextMenu>
+                    </Button>
+                </Grid>
+
+                <TreeView x:Name="ProjectTree" Grid.Row="1"
+                          BorderThickness="0"
+                          MouseDoubleClick="ProjectTree_MouseDoubleClick"
+                          KeyDown="ProjectTree_KeyDown">
+                    <TreeView.ContextMenu>
+                        <ContextMenu x:Name="ProjectTreeContextMenu"
+                                     Opened="ProjectTreeContextMenu_Opened">
+                            <MenuItem Header="_Open" Click="TreeOpen_Click"/>
+                            <Separator/>
+                            <MenuItem Header="New _File..." Click="TreeNewFile_Click"/>
+                            <MenuItem Header="New _Folder..." Click="TreeNewFolder_Click"/>
+                            <Separator/>
+                            <MenuItem Header="_Rename..." Click="TreeRename_Click"/>
+                            <MenuItem Header="_Delete" Click="TreeDelete_Click"/>
+                            <Separator/>
+                            <MenuItem Header="Show in File _Explorer" Click="TreeShowInExplorer_Click"/>
+                            <MenuItem Header="_Copy Path" Click="TreeCopyPath_Click"/>
+                        </ContextMenu>
+                    </TreeView.ContextMenu>
+                </TreeView>
+            </Grid>
+
+            <!-- Splitter between project tree and editor -->
+            <GridSplitter Grid.Column="1" Width="5"
+                          HorizontalAlignment="Stretch"
+                          Background="#DDD"/>
+
+            <!-- Column 2: tab bar + "+" button on top, editor + empty overlay below -->
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Row 0: tabs plus persistent "+" button -->
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TabControl x:Name="TabBar" Grid.Column="0"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                HorizontalAlignment="Left"
+                                SelectionChanged="TabBar_SelectionChanged"
+                                ContextMenuOpening="TabBar_ContextMenuOpening">
+                        <TabControl.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="_Close" Click="TabClose_Click"/>
+                                <MenuItem Header="Close _Others" Click="TabCloseOthers_Click"/>
+                                <MenuItem Header="Close _All" Click="TabCloseAll_Click"/>
+                            </ContextMenu>
+                        </TabControl.ContextMenu>
+                    </TabControl>
+
+                    <Button x:Name="NewTabButton" Grid.Column="1"
+                            Width="20" Height="20"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Bottom"
+                            Margin="6,0,0,4"
+                            Cursor="Hand"
+                            ToolTip="New tab (Ctrl+T)"
+                            Click="NewTabButton_Click">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Grid>
+                                    <Ellipse x:Name="Circle"
+                         Fill="#F0F0F0"
+                         Stroke="#BBB"
+                         StrokeThickness="1"/>
+                                    <TextBlock Text="+"
+                           FontSize="14"
+                           FontWeight="Bold"
+                           Foreground="#666"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           Margin="0,-2,0,0"/>
+                                </Grid>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Circle" Property="Fill" Value="#E0E0E0"/>
+                                        <Setter TargetName="Circle" Property="Stroke" Value="#888"/>
+                                    </Trigger>
+                                    <Trigger Property="IsPressed" Value="True">
+                                        <Setter TargetName="Circle" Property="Fill" Value="#D0D0D0"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </Grid>
+
+                <!-- Row 1: editor with an overlay shown when no tabs are open -->
+                <Grid Grid.Row="1">
+                    <avalon:TextEditor x:Name="Editor"
+                                       FontFamily="Consolas" FontSize="14"
+                                       ShowLineNumbers="True"/>
+
+                    <Border x:Name="EmptyStateOverlay"
+                            Background="{Binding Background, ElementName=Editor}"
+                            Visibility="Collapsed"
+                            IsHitTestVisible="False">
+                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <TextBlock Text="No file open"
+                                       FontSize="24" Foreground="#999999"
+                                       HorizontalAlignment="Center"
+                                       Margin="0,0,0,12"/>
+                            <TextBlock Foreground="#999999"
+                                       HorizontalAlignment="Center"
+                                       TextAlignment="Center">
+                                Press <Run FontWeight="SemiBold">Ctrl+T</Run> to open a new tab,
+                                <LineBreak/>
+                                or <Run FontWeight="SemiBold">Ctrl+O</Run> to open a file.
+                            </TextBlock>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Grid>
+
+            <!-- Splitter between editor and REPL -->
+            <GridSplitter Grid.Column="3" Width="5"
+                          HorizontalAlignment="Stretch"
+                          Background="#DDD"/>
+
+            <!-- Column 4: REPL output on top, REPL input on bottom -->
+            <Grid Grid.Column="4">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <TextBox x:Name="ReplOutput" Grid.Row="0"
+                         FontFamily="Consolas" FontSize="13"
+                         IsReadOnly="True"
+                         Background="#1E1E1E" Foreground="#DCDCDC"
+                         VerticalScrollBarVisibility="Auto"
+                         TextWrapping="Wrap"/>
+
+                <TextBox x:Name="ReplInput" Grid.Row="1"
+                         FontFamily="Consolas" FontSize="13"
+                         BorderThickness="0,1,0,0" BorderBrush="#888"
+                         Padding="4"/>
+            </Grid>
+        </Grid>
+
+        <!-- ============================================================ -->
+        <!-- Bottom: status bar                                           -->
+        <!-- ============================================================ -->
+        <StatusBar Grid.Row="2">
+            <StatusBarItem>
+                <TextBlock x:Name="StatusText" Text="Ready"/>
+            </StatusBarItem>
+        </StatusBar>
+    </Grid>
+</Window>

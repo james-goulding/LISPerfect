@@ -1,0 +1,27 @@
+# Visual Studio build output
+bin/
+obj/
+
+# Visual Studio user-specific
+*.user
+*.suo
+.vs/
+
+# JetBrains
+.idea/
+_ReSharper*/
+
+# NuGet
+packages/
+*.nupkg
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Editor swap/backup
+*.bak
+*~
+
+# Local installer staging (don't push the 90MB installer to git)
+/Installer-Local/

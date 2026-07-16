@@ -1,0 +1,125 @@
+﻿<?xml version="1.0"?>
+<SyntaxDefinition name="Common Lisp Dark" extensions=".lisp;.lsp;.cl;.asd"
+                  xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
+
+	<Color name="Comment"   foreground="#6A9955" />
+	<Color name="String"    foreground="#CE9178" />
+	<Color name="Keyword"   foreground="#569CD6" fontWeight="bold" />
+	<Color name="Defining"  foreground="#C586C0" fontWeight="bold" />
+	<Color name="Constant"  foreground="#4EC9B0" />
+	<Color name="Number"    foreground="#B5CEA8" />
+	<Color name="Paren"     foreground="#808080" />
+
+	<RuleSet ignoreCase="true">
+		<Span color="Comment" begin=";" />
+		<Span color="Comment" multiline="true" begin="\#\|" end="\|\#" />
+
+		<Span color="String">
+			<Begin>"</Begin>
+			<End>"</End>
+			<RuleSet>
+				<Span begin="\\" end="." />
+			</RuleSet>
+		</Span>
+
+		<Keywords color="Defining">
+			<Word>defun</Word>
+			<Word>defmacro</Word>
+			<Word>defvar</Word>
+			<Word>defparameter</Word>
+			<Word>defconstant</Word>
+			<Word>defclass</Word>
+			<Word>defmethod</Word>
+			<Word>defgeneric</Word>
+			<Word>defstruct</Word>
+			<Word>defpackage</Word>
+			<Word>defsetf</Word>
+			<Word>deftype</Word>
+			<Word>define-condition</Word>
+			<Word>define-symbol-macro</Word>
+			<Word>define-modify-macro</Word>
+			<Word>define-compiler-macro</Word>
+			<Word>in-package</Word>
+		</Keywords>
+
+		<Keywords color="Keyword">
+			<Word>if</Word>
+			<Word>when</Word>
+			<Word>unless</Word>
+			<Word>cond</Word>
+			<Word>case</Word>
+			<Word>ecase</Word>
+			<Word>typecase</Word>
+			<Word>etypecase</Word>
+			<Word>and</Word>
+			<Word>or</Word>
+			<Word>not</Word>
+			<Word>let</Word>
+			<Word>let*</Word>
+			<Word>flet</Word>
+			<Word>labels</Word>
+			<Word>lambda</Word>
+			<Word>function</Word>
+			<Word>quote</Word>
+			<Word>setq</Word>
+			<Word>setf</Word>
+			<Word>progn</Word>
+			<Word>prog1</Word>
+			<Word>prog2</Word>
+			<Word>do</Word>
+			<Word>do*</Word>
+			<Word>dolist</Word>
+			<Word>dotimes</Word>
+			<Word>loop</Word>
+			<Word>return</Word>
+			<Word>return-from</Word>
+			<Word>block</Word>
+			<Word>tagbody</Word>
+			<Word>go</Word>
+			<Word>catch</Word>
+			<Word>throw</Word>
+			<Word>unwind-protect</Word>
+			<Word>handler-case</Word>
+			<Word>handler-bind</Word>
+			<Word>restart-case</Word>
+			<Word>restart-bind</Word>
+			<Word>error</Word>
+			<Word>signal</Word>
+			<Word>warn</Word>
+			<Word>declare</Word>
+			<Word>declaim</Word>
+			<Word>proclaim</Word>
+			<Word>the</Word>
+			<Word>eval-when</Word>
+			<Word>multiple-value-bind</Word>
+			<Word>multiple-value-call</Word>
+			<Word>multiple-value-list</Word>
+			<Word>multiple-value-prog1</Word>
+			<Word>multiple-value-setq</Word>
+			<Word>values</Word>
+			<Word>destructuring-bind</Word>
+			<Word>with-open-file</Word>
+			<Word>with-output-to-string</Word>
+			<Word>with-input-from-string</Word>
+			<Word>with-slots</Word>
+			<Word>with-accessors</Word>
+		</Keywords>
+
+		<Keywords color="Constant">
+			<Word>t</Word>
+			<Word>nil</Word>
+		</Keywords>
+
+		<Rule color="Number">
+			\b(
+			\#[xX][0-9a-fA-F]+
+			| \#[oO][0-7]+
+			| \#[bB][01]+
+			|  [+-]?\d+(/\d+)?
+			|  [+-]?(\d+\.\d*|\.\d+|\d+)([eEsSfFdDlL][+-]?\d+)?
+			)\b
+		</Rule>
+
+		<Rule color="Paren">[()]</Rule>
+	</RuleSet>
+</SyntaxDefinition>
